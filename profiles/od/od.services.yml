@@ -1,0 +1,10 @@
+services:
+  od.extender:
+    class: '\Drupal\od\Extender'
+    arguments:
+      - '@app.root'
+      - '@site.path'
+  od.form_helper:
+    class: '\Drupal\od\FormHelper'
+    arguments:
+      - '@element_info'

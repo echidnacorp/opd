@@ -1,0 +1,17 @@
+name: 'Open Data Extend Analytics'
+description: 'Analytics functionality with D3.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:google_analytics_reports
+  - drupal:google_analytics_reports_api
+  - drupal:csv_serialization
+  - drupal:rest
+  - drupal:hal
+  - drupal:basic_auth
+  - drupal:serialization
+  - drupal:xls_serialization
+  - drupal:views_data_export

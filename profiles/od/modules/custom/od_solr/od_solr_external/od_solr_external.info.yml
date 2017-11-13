@@ -1,0 +1,12 @@
+name: 'Open Data Solr External'
+description: 'Sarnia related configuration for Drupal.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:od_solr
+  - drupal:search_api
+  - drupal:search_api_solr
+  - drupal:search_api_solr_datasource

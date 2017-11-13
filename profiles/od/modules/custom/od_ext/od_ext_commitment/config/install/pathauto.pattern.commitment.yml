@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: commitment
+label: commitment
+type: 'canonical_entities:node'
+pattern: 'commitment/[node:title]'
+selection_criteria:
+  4a10296d-64a1-4388-87c0-584f7622bf10:
+    id: node_type
+    bundles:
+      commitment: commitment
+    negate: false
+    context_mapping:
+      node: node
+    uuid: 4a10296d-64a1-4388-87c0-584f7622bf10
+selection_logic: and
+weight: -5
+relationships: {  }

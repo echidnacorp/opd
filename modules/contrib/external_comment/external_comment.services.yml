@@ -1,0 +1,24 @@
+services:
+  external_comment.breadcrumb:
+    class: Drupal\external_comment\CommentBreadcrumbBuilder
+    arguments: ['@entity.manager']
+    tags:
+      - { name: breadcrumb_builder, priority: 100 }
+
+  external_comment.manager:
+    class: Drupal\external_comment\CommentManager
+    arguments: ['@entity.manager', '@config.factory', '@string_translation', '@url_generator', '@module_handler', '@current_user']
+
+  external_comment.statistics:
+    class: Drupal\external_comment\CommentStatistics
+    arguments: ['@database', '@current_user', '@entity.manager', '@state']
+    tags:
+      - { name: backend_overridable }
+
+  external_comment.lazy_builders:
+    class: Drupal\external_comment\CommentLazyBuilders
+    arguments: ['@entity.manager', '@entity.form_builder', '@current_user', '@external_comment.manager', '@module_handler', '@renderer']
+
+  external_comment.link_builder:
+    class: Drupal\external_comment\CommentLinkBuilder
+    arguments: ['@current_user', '@external_comment.manager', '@module_handler', '@string_translation', '@entity.manager']

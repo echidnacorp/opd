@@ -1,0 +1,9 @@
+langcode: en
+status: false
+dependencies:
+  module:
+    - external_comment
+id: external_comment.full
+label: 'Full external comment'
+targetEntityType: external_comment
+cache: true

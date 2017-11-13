@@ -1,0 +1,107 @@
+# Schema for the configuration files of the Comment module.
+
+field.formatter.settings.external_comment_default:
+  type: mapping
+  label: 'External comment display format settings'
+  mapping:
+    view_mode:
+      type: string
+      label: 'The external comment entity view mode to be used in this formatter'
+    pager_id:
+      type: integer
+      label: 'Pager ID'
+
+field.widget.settings.external_comment_default:
+  type: mapping
+  label: 'External comment display format settings'
+
+action.configuration.external_comment_publish_action:
+  type: action_configuration_default
+  label: 'Publish external comment configuration'
+
+action.configuration.external_comment_save_action:
+  type: action_configuration_default
+  label: 'Save external comment configuration'
+
+action.configuration.external_comment_unpublish_by_keyword_action:
+  type: mapping
+  label: 'Unpublish external comment containing keyword(s) configuration'
+  mapping:
+    keywords:
+      type: sequence
+      label: 'Keywords'
+      sequence:
+        type: string
+        label: 'Keyword'
+
+action.configuration.external_comment_unpublish_action:
+  type: action_configuration_default
+  label: 'Unpublish external comment configuration'
+
+external_comment.type.*:
+  type: config_entity
+  label: 'External comment type settings'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    target_entity_type_id:
+      type: string
+      label: 'Target Entity Type ID'
+    description:
+      type: text
+      label: 'Description'
+
+field.storage_settings.external_comment:
+  type: mapping
+  label: 'External comment settings'
+  mapping:
+    external_comment_type:
+      label: 'External comment type'
+      type: string
+
+field.value.external_comment:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    status:
+      type: integer
+      label: 'External comment status'
+    cid:
+      type: integer
+      label: 'Last external comment ID'
+    last_external_comment_timestamp:
+      type: integer
+      label: 'Last external comment timestamp'
+    last_external_comment_name:
+      type: integer
+      label: 'Last external comment name'
+    last_external_comment_uid:
+      type: integer
+      label: 'Last external comment user ID'
+    external_comment_count:
+      type: integer
+      label: 'Number of external comments'
+
+field.field_settings.external_comment:
+  type: mapping
+  label: 'External comment settings'
+  mapping:
+    default_mode:
+      type: integer
+      label: 'Threading'
+    per_page:
+      type: integer
+      label: 'External comments per page'
+    anonymous:
+      type: integer
+      label: 'Mode'
+    form_location:
+      type: boolean
+      label: ' Allow external comment title'
+    preview:
+      type: integer
+      label: 'Preview external comment'

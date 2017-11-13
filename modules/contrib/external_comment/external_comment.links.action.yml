@@ -1,0 +1,5 @@
+external_comment_type_add:
+  route_name: entity.external_comment_type.add_form
+  title: 'Add external comment type'
+  appears_on:
+    - entity.external_comment_type.collection

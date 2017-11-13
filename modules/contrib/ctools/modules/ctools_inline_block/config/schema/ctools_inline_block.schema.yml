@@ -1,0 +1,10 @@
+block.settings.inline_content:*:
+  type: block_settings
+  label: 'Inline block content'
+  mapping:
+    langcode:
+      type: string
+      label: 'Language code'
+    entity:
+      type: string
+      label: 'Serialized block_content entity'

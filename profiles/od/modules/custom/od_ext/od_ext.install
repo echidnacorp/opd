@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update routines for Open Data Core.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function od_ext_install() {
+  // Enable translation for our core entities/bundles.
+  $entities = [
+    'group' => [
+      'department',
+    ],
+    'paragraph' => [
+      'app',
+      'dataset',
+      'deliverable',
+    ],
+  ];
+  wxt_ext_translation_enable_translation($entities);
+}

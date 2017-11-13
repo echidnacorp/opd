@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - external_comment
+id: external_comment_unpublish_action
+label: 'Unpublish external comment'
+type: external_comment
+plugin: external_comment_unpublish_action
+configuration: {  }

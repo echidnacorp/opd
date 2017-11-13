@@ -1,0 +1,16 @@
+services:
+  ctools_inline_block.block_loader:
+    class: '\Drupal\ctools_inline_block\BlockLoader'
+    arguments:
+      - '@entity_type.manager'
+  ctools_inline_block.panels_block_loader:
+      class: '\Drupal\ctools_inline_block\PanelizerBlockLoader'
+      arguments:
+        - '@entity_type.manager'
+        - '@panelizer'
+  ctools_inline_block.event.inline_block:
+    class: '\Drupal\ctools_inline_block\EventSubscriber\InlineBlock'
+    arguments:
+      - '@database'
+    tags:
+      - { name: event_subscriber }

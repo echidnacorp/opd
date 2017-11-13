@@ -1,0 +1,144 @@
+{
+  "checksum": {
+    "previous": "6c47687e6f6d84493b3a46d9d2636bf360cf58ff144a52470c2879788ad17ee9",
+    "current": "6c47687e6f6d84493b3a46d9d2636bf360cf58ff144a52470c2879788ad17ee9"
+  },
+  "fonts": [
+    "app/assets/fonts/fontopengov.ttf",
+    "app/assets/fonts/fontopengov.svg",
+    "app/assets/fonts/fontopengov.woff",
+    "app/assets/fonts/fontopengov.eot"
+  ],
+  "glyphs": {
+    "agriculture": {
+      "codepoint": 61696,
+      "source": "fonts/agriculture.svg"
+    },
+    "arts": {
+      "codepoint": 61697,
+      "source": "fonts/arts.svg"
+    },
+    "blog": {
+      "codepoint": 61723,
+      "source": "fonts/blog.svg"
+    },
+    "citizen": {
+      "codepoint": 61698,
+      "source": "fonts/citizen.svg"
+    },
+    "economics": {
+      "codepoint": 61699,
+      "source": "fonts/economics.svg"
+    },
+    "education": {
+      "codepoint": 61700,
+      "source": "fonts/education.svg"
+    },
+    "government": {
+      "codepoint": 61701,
+      "source": "fonts/government.svg"
+    },
+    "health": {
+      "codepoint": 61702,
+      "source": "fonts/health.svg"
+    },
+    "history": {
+      "codepoint": 61703,
+      "source": "fonts/history.svg"
+    },
+    "info": {
+      "codepoint": 61704,
+      "source": "fonts/info.svg"
+    },
+    "labour": {
+      "codepoint": 61705,
+      "source": "fonts/labour.svg"
+    },
+    "law": {
+      "codepoint": 61706,
+      "source": "fonts/law.svg"
+    },
+    "maps": {
+      "codepoint": 61707,
+      "source": "fonts/maps.svg"
+    },
+    "military": {
+      "codepoint": 61708,
+      "source": "fonts/military.svg"
+    },
+    "nature": {
+      "codepoint": 61709,
+      "source": "fonts/nature.svg"
+    },
+    "open-data": {
+      "codepoint": 61718,
+      "source": "fonts/open-data.svg"
+    },
+    "open-dialog": {
+      "codepoint": 61719,
+      "source": "fonts/open-dialog.svg"
+    },
+    "open-gov": {
+      "codepoint": 61722,
+      "source": "fonts/open-gov.svg"
+    },
+    "open-govt": {
+      "codepoint": 61720,
+      "source": "fonts/open-govt.svg"
+    },
+    "open-info": {
+      "codepoint": 61721,
+      "source": "fonts/open-info.svg"
+    },
+    "projects": {
+      "codepoint": 61710,
+      "source": "fonts/projects.svg"
+    },
+    "science": {
+      "codepoint": 61711,
+      "source": "fonts/science.svg"
+    },
+    "society": {
+      "codepoint": 61712,
+      "source": "fonts/society.svg"
+    },
+    "transport": {
+      "codepoint": 61713,
+      "source": "fonts/transport.svg"
+    }
+  },
+  "options": {
+    "autowidth": false,
+    "config": "fontcustom.yml",
+    "css_selector": ".opengov-{{glyph}}",
+    "debug": false,
+    "font_ascent": 448,
+    "font_descent": 64,
+    "font_design_size": 16,
+    "font_em": 512,
+    "font_name": "fontopengov",
+    "force": false,
+    "input": {
+      "templates": "fonts",
+      "vectors": "fonts"
+    },
+    "no_hash": true,
+    "output": {
+      "css": "app/assets/stylesheets",
+      "fonts": "app/assets/fonts",
+      "preview": "app/views/styleguide"
+    },
+    "preprocessor_path": "",
+    "quiet": false,
+    "templates": [
+      "scss",
+      "css",
+      "preview"
+    ]
+  },
+  "templates": [
+    "app/assets/stylesheets/_fontopengov.scss",
+    "app/assets/stylesheets/fontopengov.css",
+    "app/views/styleguide/fontopengov-preview.html"
+  ]
+}

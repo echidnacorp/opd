@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_message_subscribe
+  module:
+    - user
+id: user.user.field_message_subscribe
+field_name: field_message_subscribe
+entity_type: user
+bundle: user
+label: 'Daily Digest'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

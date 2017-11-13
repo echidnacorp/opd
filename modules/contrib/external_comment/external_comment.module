@@ -1,0 +1,786 @@
+<?php
+
+/**
+ * @file
+ * Enables users to comment on published content.
+ *
+ * When installed, the Comment module creates a field that facilitates a
+ * discussion board for each Drupal entity to which a comment field is attached.
+ * Users can post external comments to discuss a forum topic, story, collaborative
+ * book page, user etc.
+ */
+
+use Drupal\external_comment\CommentInterface;
+use Drupal\external_comment\Entity\CommentType;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\external_comment\Plugin\Field\FieldType\CommentItemInterface;
+use Drupal\Core\Entity\Entity\EntityViewMode;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\FieldConfigInterface;
+use Drupal\field\FieldStorageConfigInterface;
+use Drupal\node\NodeInterface;
+use Drupal\user\RoleInterface;
+
+/**
+ * Anonymous posters cannot enter their contact information.
+ *
+ * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ *   Use \Drupal\external_comment\CommentInterface::ANONYMOUS_MAYNOT_CONTACT instead.
+ */
+const EXTERNAL_COMMENT_ANONYMOUS_MAYNOT_CONTACT = 0;
+
+/**
+ * Anonymous posters may leave their contact information.
+ *
+ * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ *   Use \Drupal\external_comment\CommentInterface::ANONYMOUS_MAY_CONTACT instead.
+ */
+const EXTERNAL_COMMENT_ANONYMOUS_MAY_CONTACT = 1;
+
+/**
+ * Anonymous posters are required to leave their contact information.
+ *
+ * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ *   Use \Drupal\external_comment\CommentInterface::ANONYMOUS_MUST_CONTACT instead.
+ */
+const EXTERNAL_COMMENT_ANONYMOUS_MUST_CONTACT = 2;
+
+/**
+ * The time cutoff for comments marked as read for entity types other node.
+ *
+ * Comments changed before this time are always marked as read.
+ * Comments changed after this time may be marked new, updated, or read,
+ * depending on their state for the current user. Defaults to 30 days ago.
+ *
+ * @todo Remove when https://www.drupal.org/node/1029708 lands.
+ */
+define('EXTERNAL_COMMENT_NEW_LIMIT', REQUEST_TIME - 30 * 24 * 60 * 60);
+
+/**
+ * Implements hook_help().
+ */
+function external_comment_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.comment':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Comment module allows users to comment on site content, set commenting defaults and permissions, and moderate comments. For more information, see the <a href=":comment">online documentation for the Comment module</a>.', [':comment' => 'https://www.drupal.org/documentation/modules/comment']) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Enabling commenting') . '</dt>';
+      $output .= '<dd>' . t('Comment functionality can be enabled for any entity sub-type (for example, a <a href=":content-type">content type</a>) by adding a <em>Comments</em> field on its <em>Manage fields page</em>. Adding or removing commenting for an entity through the user interface requires the <a href=":field_ui">Field UI</a> module to be enabled, even though the commenting functionality works without it. For more information on fields and entities, see the <a href=":field">Field module help page</a>.', [':content-type' => (\Drupal::moduleHandler()->moduleExists('node')) ? \Drupal::url('entity.node_type.collection') : '#', ':field' => \Drupal::url('help.page', ['name' => 'field']), ':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? \Drupal::url('help.page', ['name' => 'field_ui']) : '#']) . '</dd>';
+      $output .= '<dt>' . t('Configuring commenting settings') . '</dt>';
+      $output .= '<dd>' . t('Commenting settings can be configured by editing the <em>Comments</em> field on the <em>Manage fields page</em> of an entity type if the <em>Field UI module</em> is enabled. Configuration includes the label of the comments field, the number of comments to be displayed, and whether they are shown in threaded list. Commenting can be be configured as: <em>Open</em> to allow new comments, <em>Closed</em> to view existing comments, but prevent new comments, or <em>Hidden</em> to hide existing comments and prevent new comments. Changing this configuration for an entity type will not change existing entity items.') . '</dd>';
+      $output .= '<dt>' . t('Overriding default settings') . '</dt>';
+      $output .= '<dd>' . t('Users with the appropriate permissions can override the default commenting settings of an entity type when they create an item of that type.') . '</dd>';
+      $output .= '<dt>' . t('Adding comment types') . '</dt>';
+      $output .= '<dd>' . t('Additional <em>comment types</em> can be created per entity sub-type and added on the <a href=":field">Comment types page</a>. If there are multiple comment types available you can select the appropriate one after adding a <em>Comments field</em>.', [':field' => \Drupal::url('entity.external_comment_type.collection')]) . '</dd>';
+      $output .= '<dt>' . t('Approving and managing comments') . '</dt>';
+      $output .= '<dd>' . t('Comments from users who have the <em>skip external comment approval</em> permission are published immediately. All other comments are placed in the <a href=":comment-approval">Unapproved comments</a> queue, until a user who has permission to <em>administer external comments and comment settings</em> publishes or deletes them. Published comments can be bulk managed on the <a href=":admin-comment">Published comments</a> administration page. When a comment has no replies, it remains editable by its author, as long as the author has <em>edit own external comments</em> permission.', [':comment-approval' => \Drupal::url('external_comment.admin_approval'), ':admin-comment' => \Drupal::url('external_comment.admin')]) . '</dd>';
+      $output .= '</dl>';
+      return $output;
+
+    case 'entity.external_comment_type.collection':
+      $output = '<p>' . t('This page provides a list of all comment types on the site and allows you to manage the fields, form and display settings for each.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Entity URI callback.
+ */
+function external_comment_uri(CommentInterface $comment) {
+  return new Url(
+    'entity.external_comment.canonical',
+    [
+      'external_comment' => $comment->id(),
+    ],
+    ['fragment' => 'comment-' . $comment->id()]
+  );
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function external_comment_entity_extra_field_info() {
+  $return = [];
+  foreach (CommentType::loadMultiple() as $external_comment_type) {
+    $return['external_comment'][$external_comment_type->id()] = [
+      'form' => [
+        'author' => [
+          'label' => t('Author'),
+          'description' => t('Author textfield'),
+          'weight' => -2,
+        ],
+      ],
+    ];
+    $return['external_comment'][$external_comment_type->id()]['display']['links'] = [
+      'label' => t('Links'),
+      'description' => t('Comment operation links'),
+      'weight' => 100,
+      'visible' => TRUE,
+    ];
+  }
+
+  return $return;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function external_comment_theme() {
+  return [
+    'external_comment' => [
+      'render element' => 'elements',
+    ],
+    'field__external_comment' => [
+      'base hook' => 'field',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create() for 'field_config'.
+ */
+function external_comment_field_config_create(FieldConfigInterface $field) {
+  if ($field->getType() == 'external_comment' && !$field->isSyncing()) {
+    // Assign default values for the field.
+    $default_value = $field->getDefaultValueLiteral();
+    $default_value += [[]];
+    $default_value[0] += [
+      'status' => CommentItemInterface::OPEN,
+      'cid' => 0,
+      'last_external_comment_timestamp' => 0,
+      'last_external_comment_name' => '',
+      'last_external_comment_uid' => 0,
+      'external_comment_count' => 0,
+    ];
+    $field->setDefaultValue($default_value);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for 'field_config'.
+ */
+function external_comment_field_config_update(FieldConfigInterface $field) {
+  if ($field->getType() == 'external_comment') {
+    // Comment field settings also affects the rendering of *comment* entities,
+    // not only the *commented* entities.
+    \Drupal::entityManager()->getViewBuilder('external_comment')->resetCache();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for 'field_config'.
+ */
+function external_comment_field_config_delete(FieldConfigInterface $field) {
+  if ($field->getType() == 'external_comment') {
+    // Delete all comments that used by the entity bundle.
+    $entity_query = \Drupal::entityQuery('external_comment');
+    $entity_query->condition('entity_type', $field->getEntityTypeId());
+    $entity_query->condition('field_name', $field->getName());
+    $cids = $entity_query->execute();
+    entity_delete_multiple('external_comment', $cids);
+  }
+}
+
+/**
+ * Implements hook_node_links_alter().
+ */
+function external_comment_node_links_alter(array &$links, NodeInterface $node, array &$context) {
+  // Comment links are only added to node entity type for backwards
+  // compatibility. Should you require comment links for other entity types you
+  // can do so by implementing a new field formatter.
+  // @todo Make this configurable from the formatter. See
+  //   https://www.drupal.org/node/1901110.
+
+  $external_comment_links = \Drupal::service('external_comment.link_builder')->buildCommentedEntityLinks($node, $context);
+  $links += $external_comment_links;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function external_comment_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($entity instanceof FieldableEntityInterface && $view_mode == 'rss' && $display->getComponent('links')) {
+    /** @var \Drupal\external_comment\CommentManagerInterface $external_comment_manager */
+    $external_comment_manager = \Drupal::service('external_comment.manager');
+    $fields = $external_comment_manager->getFields($entity->getEntityTypeId());
+    foreach ($fields as $field_name => $detail) {
+      if ($entity->hasField($field_name) && $entity->get($field_name)->status != CommentItemInterface::HIDDEN) {
+        // Add a comments RSS element which is a URL to the comments of this
+        // entity.
+        $options = [
+          'fragment' => 'external_comments',
+          'absolute' => TRUE,
+        ];
+        $entity->rss_elements[] = [
+          'key' => 'external_comments',
+          'value' => $entity->url('canonical', $options),
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view_alter() for node entities.
+ */
+function external_comment_node_view_alter(array &$build, EntityInterface $node, EntityViewDisplayInterface $display) {
+  if (\Drupal::moduleHandler()->moduleExists('history')) {
+    $build['#attributes']['data-history-node-id'] = $node->id();
+  }
+}
+
+/**
+ * Generates an array for rendering a comment.
+ *
+ * @param \Drupal\external_comment\CommentInterface $comment
+ *   The comment object.
+ * @param string $view_mode
+ *   (optional) View mode; for instance, 'full', 'teaser', etc. Defaults to
+ *   'full'.
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ *
+ * @return array
+ *   An array as expected by drupal_render().
+ *
+ * @deprecated in Drupal 8.x and will be removed before Drupal 9.0.
+ *   Use \Drupal::entityManager()->getViewBuilder('external_comment')->view().
+ */
+function external_comment_view(CommentInterface $comment, $view_mode = 'full', $langcode = NULL) {
+  return entity_view($comment, $view_mode, $langcode);
+}
+
+/**
+ * Constructs render array from an array of loaded comments.
+ *
+ * @param \Drupal\external_comment\CommentInterface[] $comments
+ *   An array of comments as returned by entity_load_multiple().
+ * @param string $view_mode
+ *   (optional) View mode; for instance, 'full', 'teaser', etc. Defaults to
+ *   'full'.
+ * @param string $langcode
+ *   (optional) A string indicating the language field values are to be shown
+ *   in. If no language is provided the current content language is used.
+ *   Defaults to NULL.
+ *
+ * @return array
+ *   An array in the format expected by drupal_render().
+ *
+ * @deprecated in Drupal 8.x and will be removed before Drupal 9.0.
+ *   Use \Drupal::entityManager()->getViewBuilder('external_comment')->viewMultiple().
+ *
+ * @see drupal_render()
+ */
+function external_comment_view_multiple($comments, $view_mode = 'full', $langcode = NULL) {
+  return entity_view_multiple($comments, $view_mode, $langcode);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for field_ui_field_storage_add_form.
+ */
+function external_comment_form_field_ui_field_storage_add_form_alter(&$form, FormStateInterface $form_state) {
+  $route_match = \Drupal::routeMatch();
+  if ($form_state->get('entity_type_id') == 'external_comment' && $route_match->getParameter('commented_entity_type')) {
+    $form['#title'] = \Drupal::service('external_comment.manager')->getFieldUIPageTitle($route_match->getParameter('commented_entity_type'), $route_match->getParameter('field_name'));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function external_comment_form_field_ui_form_display_overview_form_alter(&$form, FormStateInterface $form_state) {
+  $route_match = \Drupal::routeMatch();
+  if ($form['#entity_type'] == 'external_comment' && $route_match->getParameter('commented_entity_type')) {
+    $form['#title'] = \Drupal::service('external_comment.manager')->getFieldUIPageTitle($route_match->getParameter('commented_entity_type'), $route_match->getParameter('field_name'));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function external_comment_form_field_ui_display_overview_form_alter(&$form, FormStateInterface $form_state) {
+  $route_match = \Drupal::routeMatch();
+  if ($form['#entity_type'] == 'external_comment' && $route_match->getParameter('commented_entity_type')) {
+    $form['#title'] = \Drupal::service('external_comment.manager')->getFieldUIPageTitle($route_match->getParameter('commented_entity_type'), $route_match->getParameter('field_name'));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'field_storage_config_edit_form'.
+ */
+function external_comment_form_field_storage_config_edit_form_alter(&$form, FormStateInterface $form_state) {
+  if ($form_state->getFormObject()->getEntity()->getType() == 'external_comment') {
+    // We only support posting one comment at the time so it doesn't make sense
+    // to let the site builder choose anything else.
+    $form['cardinality_container']['cardinality']['#default_value'] = 1;
+    $form['cardinality_container']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_entity_storage_load().
+ *
+ * @see \Drupal\external_comment\Plugin\Field\FieldType\CommentItem::propertyDefinitions()
+ */
+function external_comment_entity_storage_load($entities, $entity_type) {
+  // Comments can only be attached to content entities, so skip others.
+  if (!\Drupal::entityManager()->getDefinition($entity_type)->entityClassImplements(FieldableEntityInterface::class)) {
+    return;
+  }
+  if (!\Drupal::service('external_comment.manager')->getFields($entity_type)) {
+    // Do not query database when entity has no comment fields.
+    return;
+  }
+  // Load comment information from the database and update the entity's
+  // comment statistics properties, which are defined on each CommentItem field.
+  $result = \Drupal::service('external_comment.statistics')->read($entities, $entity_type);
+  foreach ($result as $record) {
+    // Skip fields that entity does not have.
+    if (!$entities[$record->entity_id]->hasField($record->field_name)) {
+      continue;
+    }
+    $external_comment_statistics = $entities[$record->entity_id]->get($record->field_name);
+    $external_comment_statistics->cid = $record->cid;
+    $external_comment_statistics->last_external_comment_timestamp = $record->last_external_comment_timestamp;
+    $external_comment_statistics->last_external_comment_name = $record->last_external_comment_name;
+    $external_comment_statistics->last_external_comment_uid = $record->last_external_comment_uid;
+    $external_comment_statistics->external_comment_count = $record->external_comment_count;
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function external_comment_entity_insert(EntityInterface $entity) {
+  // Allow bulk updates and inserts to temporarily disable the
+  // maintenance of the {external_comment_entity_statistics} table.
+  if (\Drupal::state()->get('external_comment.maintain_entity_statistics') &&
+    $fields = \Drupal::service('external_comment.manager')->getFields($entity->getEntityTypeId())) {
+    \Drupal::service('external_comment.statistics')->create($entity, $fields);
+  }
+}
+
+/**
+ * Implements hook_entity_predelete().
+ */
+function external_comment_entity_predelete(EntityInterface $entity) {
+  if ($entity instanceof FieldableEntityInterface && FieldStorageConfig::loadByName('external_comment', 'commented_' . $entity->getEntityTypeId())) {
+    $entity_query = \Drupal::entityQuery('external_comment');
+    $entity_query->condition('commented_' . $entity->getEntityTypeId() . '.target_id', $entity->id());
+    $entity_query->condition('entity_type', $entity->getEntityTypeId());
+    $cids = $entity_query->execute();
+    entity_delete_multiple('external_comment', $cids);
+    \Drupal::service('external_comment.statistics')->delete($entity);
+  }
+}
+
+/**
+ * Implements hook_node_update_index().
+ */
+function external_comment_node_update_index(EntityInterface $node) {
+  $index_comments = &drupal_static(__FUNCTION__);
+
+  if ($index_comments === NULL) {
+    // Do not index in the following three cases:
+    // 1. 'Authenticated user' can search content but can't access external comments.
+    // 2. 'Anonymous user' can search content but can't access external comments.
+    // 3. Any role can search content but can't access external comments and access
+    // comments is not granted by the 'authenticated user' role. In this case
+    // all users might have both permissions from various roles but it is also
+    // possible to set up a user to have only search content and so a user
+    // edit could change the security situation so it is not safe to index the
+    // comments.
+    $index_comments = TRUE;
+    $roles = \Drupal::entityManager()->getStorage('user_role')->loadMultiple();
+    $authenticated_can_access = $roles[RoleInterface::AUTHENTICATED_ID]->hasPermission('access external comments');
+    foreach ($roles as $rid => $role) {
+      if ($role->hasPermission('search content') && !$role->hasPermission('access external comments')) {
+        if ($rid == RoleInterface::AUTHENTICATED_ID || $rid == RoleInterface::ANONYMOUS_ID || !$authenticated_can_access) {
+          $index_comments = FALSE;
+          break;
+        }
+      }
+    }
+  }
+
+  $build = [];
+
+  if ($index_comments) {
+    foreach (\Drupal::service('external_comment.manager')->getFields('node') as $field_name => $info) {
+      // Skip fields that entity does not have.
+      if (!$node->hasField($field_name)) {
+        continue;
+      }
+      $field_definition = $node->getFieldDefinition($field_name);
+      $mode = $field_definition->getSetting('default_mode');
+      $comments_per_page = $field_definition->getSetting('per_page');
+      if ($node->get($field_name)->status) {
+        $comments = \Drupal::entityManager()->getStorage('external_comment')
+          ->loadThread($node, $field_name, $mode, $comments_per_page);
+        if ($comments) {
+          $build[] = \Drupal::entityManager()->getViewBuilder('external_comment')->viewMultiple($comments);
+        }
+      }
+    }
+  }
+  return \Drupal::service('renderer')->renderPlain($build);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function external_comment_cron() {
+  // Store the maximum possible comments per thread (used for node search
+  // ranking by reply count).
+  \Drupal::state()->set('external_comment.node_external_comment_statistics_scale', 1.0 / max(1, \Drupal::service('external_comment.statistics')->getMaximumCount('node')));
+}
+
+/**
+ * Implements hook_node_search_result().
+ *
+ * Formats a comment count string and returns it, for display with search
+ * results.
+ */
+function external_comment_node_search_result(EntityInterface $node) {
+  $external_comment_fields = \Drupal::service('external_comment.manager')->getFields('node');
+  $comments = 0;
+  $open = FALSE;
+  foreach ($external_comment_fields as $field_name => $info) {
+    // Skip fields that entity does not have.
+    if (!$node->hasField($field_name)) {
+      continue;
+    }
+    // Do not make a string if comments are hidden.
+    $status = $node->get($field_name)->status;
+    if (\Drupal::currentUser()->hasPermission('access external comments') && $status != CommentItemInterface::HIDDEN) {
+      if ($status == CommentItemInterface::OPEN) {
+        // At least one comment field is open.
+        $open = TRUE;
+      }
+      $comments += $node->get($field_name)->external_comment_count;
+    }
+  }
+  // Do not make a string if there are no comment fields, or no comments exist
+  // or all comment fields are hidden.
+  if ($comments > 0 || $open) {
+    return ['external_comment' => \Drupal::translation()->formatPlural($comments, '1 comment', '@count comments')];
+  }
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function external_comment_user_cancel($edit, $account, $method) {
+  switch ($method) {
+    case 'user_cancel_block_unpublish':
+      $comments = entity_load_multiple_by_properties('external_comment', ['uid' => $account->id()]);
+      foreach ($comments as $comment) {
+        $comment->setPublished(CommentInterface::NOT_PUBLISHED);
+        $comment->save();
+      }
+      break;
+
+    case 'user_cancel_reassign':
+      /** @var \Drupal\external_comment\CommentInterface[] $comments */
+      $comments = entity_load_multiple_by_properties('external_comment', ['uid' => $account->id()]);
+      foreach ($comments as $comment) {
+        $comment->setOwnerId(0);
+        $comment->setAuthorName(\Drupal::config('user.settings')->get('anonymous'));
+        $comment->save();
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for user entities.
+ */
+function external_comment_user_predelete($account) {
+  $entity_query = \Drupal::entityQuery('external_comment');
+  $entity_query->condition('uid', $account->id());
+  $cids = $entity_query->execute();
+  entity_delete_multiple('external_comment', $cids);
+}
+
+/**
+ * Generates a comment preview.
+ *
+ * @param \Drupal\external_comment\CommentInterface $comment
+ *   The comment entity to preview.
+ * @param Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ *
+ * @return array
+ *   An array as expected by drupal_render().
+ */
+function external_comment_preview(CommentInterface $comment, FormStateInterface $form_state) {
+  $preview_build = [];
+  $entity = $comment->getCommentedEntity();
+
+  if (!$form_state->getErrors()) {
+    $comment->in_preview = TRUE;
+    $external_comment_build = \Drupal::entityTypeManager()->getViewBuilder('external_comment')->view($comment);
+    $external_comment_build['#weight'] = -100;
+
+    $preview_build['external_comment_preview'] = $external_comment_build;
+  }
+
+  if ($comment->hasParentComment()) {
+    $build = [];
+    $parent = $comment->getParentComment();
+    if ($parent && $parent->isPublished()) {
+      $build = \Drupal::entityTypeManager()->getViewBuilder('external_comment')->view($parent);
+    }
+  }
+  else {
+    // The comment field output includes rendering the parent entity of the
+    // thread to which the comment is a reply. The rendered entity output
+    // includes the comment reply form, which contains the comment preview and
+    // therefore the rendered parent entity. This results in an infinite loop of
+    // parent entity output rendering the comment form and the comment form
+    // rendering the parent entity. To prevent this infinite loop we temporarily
+    // set the value of the comment field on a clone of the entity to hidden
+    // before calling entity_view(). That way when the output of the commented
+    // entity is rendered, it excludes the comment field output.
+    $field_name = $comment->getFieldName();
+    $entity = clone $entity;
+    $entity->$field_name->status = CommentItemInterface::HIDDEN;
+    $build = entity_view($entity, 'full');
+  }
+
+  $preview_build['external_comment_output_below'] = $build;
+  $preview_build['external_comment_output_below']['#weight'] = 100;
+
+  return $preview_build;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for block templates.
+ */
+function external_comment_preprocess_block(&$variables) {
+  if ($variables['configuration']['provider'] == 'external_comment') {
+    $variables['attributes']['role'] = 'navigation';
+  }
+}
+
+/**
+ * Prepares variables for comment templates.
+ *
+ * Default template: comment.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing the comment and entity objects.
+ *     Array keys: #comment, #commented_entity.
+ */
+function template_preprocess_external_comment(&$variables) {
+  /** @var \Drupal\external_comment\CommentInterface $comment */
+  $comment = $variables['elements']['#external_comment'];
+  $commented_entity = $comment->getCommentedEntity();
+  $variables['external_comment'] = $comment;
+  $variables['commented_entity'] = $commented_entity;
+  $variables['threaded'] = $variables['elements']['#external_comment_threaded'];
+
+  $account = $comment->getOwner();
+  $username = [
+    '#theme' => 'username',
+    '#account' => $account,
+  ];
+  $variables['author'] = drupal_render($username);
+  $variables['author_id'] = $comment->getOwnerId();
+  $variables['new_indicator_timestamp'] = $comment->getChangedTime();
+  $variables['created'] = format_date($comment->getCreatedTime());
+  // Avoid calling format_date() twice on the same timestamp.
+  if ($comment->getChangedTime() == $comment->getCreatedTime()) {
+    $variables['changed'] = $variables['created'];
+  }
+  else {
+    $variables['changed'] = format_date($comment->getChangedTime());
+  }
+
+  if (theme_get_setting('features.external_comment_user_picture')) {
+    // To change user picture settings (for instance, image style), edit the
+    // 'compact' view mode on the User entity.
+    $variables['user_picture'] = user_view($account, 'compact');
+  }
+  else {
+    $variables['user_picture'] = [];
+  }
+
+  if (isset($comment->in_preview)) {
+    $variables['title'] = \Drupal::l($comment->getSubject(), new Url('<front>'));
+    $variables['permalink'] = \Drupal::l(t('Permalink'), new Url('<front>'));
+  }
+  else {
+    $uri = $comment->permalink();
+    $attributes = $uri->getOption('attributes') ?: [];
+    $attributes += ['class' => ['permalink'], 'rel' => 'bookmark'];
+    $uri->setOption('attributes', $attributes);
+    $variables['title'] = \Drupal::l($comment->getSubject(), $uri);
+
+    $variables['permalink'] = \Drupal::l(t('Permalink'), $comment->permalink());
+  }
+
+  $variables['submitted'] = t('Submitted by @username on @datetime', ['@username' => $variables['author'], '@datetime' => $variables['created']]);
+
+  if ($comment->hasParentComment()) {
+    // Fetch and store the parent comment information for use in templates.
+    $external_comment_parent = $comment->getParentComment();
+    $account_parent = $external_comment_parent->getOwner();
+    $variables['parent_comment'] = $external_comment_parent;
+    $username = [
+      '#theme' => 'username',
+      '#account' => $account_parent,
+    ];
+    $variables['parent_author'] = drupal_render($username);
+    $variables['parent_created'] = format_date($external_comment_parent->getCreatedTime());
+    // Avoid calling format_date() twice on the same timestamp.
+    if ($external_comment_parent->getChangedTime() == $external_comment_parent->getCreatedTime()) {
+      $variables['parent_changed'] = $variables['parent_created'];
+    }
+    else {
+      $variables['parent_changed'] = format_date($external_comment_parent->getChangedTime());
+    }
+    $permalink_uri_parent = $external_comment_parent->permalink();
+    $attributes = $permalink_uri_parent->getOption('attributes') ?: [];
+    $attributes += ['class' => ['permalink'], 'rel' => 'bookmark'];
+    $permalink_uri_parent->setOption('attributes', $attributes);
+    $variables['parent_title'] = \Drupal::l($external_comment_parent->getSubject(), $permalink_uri_parent);
+    $variables['parent_permalink'] = \Drupal::l(t('Parent permalink'), $permalink_uri_parent);
+    $variables['parent'] = t('In reply to @parent_title by @parent_username',
+        ['@parent_username' => $variables['parent_author'], '@parent_title' => $variables['parent_title']]);
+  }
+  else {
+    $variables['parent_comment'] = '';
+    $variables['parent_author'] = '';
+    $variables['parent_created'] = '';
+    $variables['parent_changed'] = '';
+    $variables['parent_title'] = '';
+    $variables['parent_permalink'] = '';
+    $variables['parent'] = '';
+  }
+
+  // Helpful $content variable for templates.
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  // Set status to a string representation of comment->status.
+  if (isset($comment->in_preview)) {
+    $variables['status'] = 'preview';
+  }
+  else {
+    $variables['status'] = $comment->isPublished() ? 'published' : 'unpublished';
+  }
+
+  // Add comment author user ID. Necessary for the comment-by-viewer library.
+  $variables['attributes']['data-comment-user-id'] = $comment->getOwnerId();
+}
+
+/**
+ * Prepares variables for comment field templates.
+ *
+ * Default template: field--comment.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing render arrays for the list of
+ *     comments, and the comment form. Array keys: comments, external_comment_form.
+ *
+ * @todo Rename to template_preprocess_field__comment() once
+ *   https://www.drupal.org/node/939462 is resolved.
+ */
+function external_comment_preprocess_field(&$variables) {
+  $element = $variables['element'];
+  if ($element['#field_type'] == 'external_comment') {
+    // Provide contextual information.
+    $variables['external_comment_display_mode'] = $element[0]['#external_comment_display_mode'];
+    $variables['external_comment_type'] = $element[0]['#external_comment_type'];
+
+    // Append additional attributes (eg. RDFa) from the first field item.
+    $variables['attributes'] += $variables['items'][0]['attributes']->storage();
+
+    // Create separate variables for the comments and comment form.
+    $variables['external_comments'] = $element[0]['external_comments'];
+    $variables['external_comment_form'] = $element[0]['external_comment_form'];
+  }
+}
+
+/**
+ * Implements hook_ranking().
+ */
+function external_comment_ranking() {
+  return \Drupal::service('external_comment.statistics')->getRankingInfo();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for entity_view_display entities.
+ */
+function external_comment_entity_view_display_presave(EntityViewDisplayInterface $display) {
+  // Act only on comment view displays being disabled.
+  if ($display->isNew() || $display->getTargetEntityTypeId() !== 'external_comment' || $display->status()) {
+    return;
+  }
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+  if (!$storage->loadUnchanged($display->getOriginalId())->status()) {
+    return;
+  }
+
+  // Disable the comment field formatter when the used view display is disabled.
+  foreach ($storage->loadMultiple() as $id => $view_display) {
+    $changed = FALSE;
+    /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $view_display */
+    foreach ($view_display->getComponents() as $field => $component) {
+      if (isset($component['type']) && ($component['type'] === 'external_comment_default')) {
+        if ($component['settings']['view_mode'] === $display->getMode()) {
+          $view_display->removeComponent($field);
+          /** @var \Drupal\Core\Entity\EntityViewModeInterface $mode */
+          $mode = EntityViewMode::load($display->getTargetEntityTypeId() . '.' . $display->getMode());
+          $arguments = [
+            '@id' => $view_display->id(),
+            '@name' => $field,
+            '@display' => $mode->label(),
+            '@mode' => $display->getMode(),
+          ];
+          \Drupal::logger('system')->warning("View display '@id': Comment field formatter '@name' was disabled because it is using the comment view display '@display' (@mode) that was just disabled.", $arguments);
+          $changed = TRUE;
+        }
+      }
+    }
+    if ($changed) {
+      $view_display->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_type_load().
+ */
+function external_comment_external_entity_load($entities) {
+  // Load external comment information from the database and update the external
+  // entity's comment statistics properties, which are defined on each
+  // CommentItem field.
+  $result = \Drupal::service('external_comment.statistics')->read($entities, 'external_entity');
+  foreach ($result as $record) {
+    // Skip fields that entity does not have.
+    if (!$entities[$record->entity_id]->hasField($record->field_name)) {
+      continue;
+    }
+    $external_comment_statistics = $entities[$record->entity_id]->get($record->field_name);
+    $external_comment_statistics->cid = $record->cid;
+    $external_comment_statistics->last_external_comment_timestamp = $record->last_external_comment_timestamp;
+    $external_comment_statistics->last_external_comment_name = $record->last_external_comment_name;
+    $external_comment_statistics->last_external_comment_uid = $record->last_external_comment_uid;
+    $external_comment_statistics->external_comment_count = $record->external_comment_count;
+  }
+}

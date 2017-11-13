@@ -1,0 +1,10 @@
+name: 'Open Data Extend Vote'
+description: 'Provides functionality for storing, retrieving, and tabulating votes.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:votingapi
+  - drupal:votingapi_widgets

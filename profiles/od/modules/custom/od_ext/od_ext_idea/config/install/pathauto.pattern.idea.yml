@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: idea
+label: idea
+type: 'canonical_entities:node'
+pattern: 'idea/[node:title]'
+selection_criteria:
+  c299fe0a-1b6c-4a65-b314-f32d486d96c8:
+    id: node_type
+    bundles:
+      idea: idea
+    negate: false
+    context_mapping:
+      node: node
+    uuid: c299fe0a-1b6c-4a65-b314-f32d486d96c8
+selection_logic: and
+weight: -5
+relationships: {  }

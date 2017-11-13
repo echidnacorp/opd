@@ -1,0 +1,9 @@
+name: 'Open Data Extend Taxonomy'
+description: 'Provides taxonomy vocabularies used for categorizing content.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:taxonomy

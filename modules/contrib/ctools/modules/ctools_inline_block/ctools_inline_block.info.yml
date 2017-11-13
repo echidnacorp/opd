@@ -1,0 +1,9 @@
+name: 'Inline Blocks'
+type: module
+description: 'Exposes the custom block functionality of Drupal core as inline blocks what do not save to the database.'
+package: 'Chaos tool suite'
+version: 3.x
+core: 8.x
+dependencies:
+    - inline_entity_form
+    - block_content

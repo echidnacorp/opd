@@ -1,0 +1,124 @@
+external_comment.admin:
+  path: '/admin/content/external/comment'
+  defaults:
+    _title: 'External comments'
+    _controller: '\Drupal\external_comment\Controller\AdminController::adminPage'
+    type: 'new'
+  requirements:
+    _permission: 'administer external comments'
+
+external_comment.admin_approval:
+  path: '/admin/content/external/comment/approval'
+  defaults:
+    _title: 'Unapproved external comments'
+    _controller: '\Drupal\external_comment\Controller\AdminController::adminPage'
+    type: 'approval'
+  requirements:
+    _permission: 'administer external comments'
+
+entity.external_comment.edit_form:
+  path: '/external/comment/{external_comment}/edit'
+  defaults:
+    _title: 'Edit'
+    _entity_form: 'external_comment.default'
+  requirements:
+    _entity_access: 'external_comment.update'
+    external_comment: \d+
+
+external_comment.approve:
+  path: '/external/comment/{external_comment}/approve'
+  defaults:
+    _title: 'Approve'
+    _controller: '\Drupal\external_comment\Controller\CommentController::commentApprove'
+    entity_type: 'external_comment'
+  requirements:
+    _entity_access: 'external_comment.approve'
+    _csrf_token: 'TRUE'
+    external_comment: \d+
+
+entity.external_comment.canonical:
+  path: '/external/comment/{external_comment}'
+  defaults:
+    _title_callback: '\Drupal\external_comment\Controller\CommentController::commentPermalinkTitle'
+    _controller: '\Drupal\external_comment\Controller\CommentController::commentPermalink'
+  requirements:
+    _entity_access: 'external_comment.view'
+    external_comment: \d+
+
+entity.external_comment.delete_form:
+  path: '/external/comment/{external_comment}/delete'
+  defaults:
+    _title: 'Delete'
+    _entity_form: 'external_comment.delete'
+  requirements:
+    _entity_access: 'external_comment.delete'
+    external_comment: \d+
+
+external_comment.reply:
+  path: '/external/comment/reply/{entity_type}/{entity}/{field_name}/{pid}'
+  defaults:
+    _controller: '\Drupal\external_comment\Controller\CommentController::getReplyForm'
+    _title: 'Add new external comment'
+    pid: ~
+  requirements:
+    _custom_access: '\Drupal\external_comment\Controller\CommentController::replyFormAccess'
+  options:
+    parameters:
+      entity:
+        type: entity:{entity_type}
+
+external_comment.new_comments_node_links:
+  path: '/external/comments/render_new_comments_node_links'
+  defaults:
+    _controller: '\Drupal\external_comment\Controller\CommentController::renderNewCommentsNodeLinks'
+  requirements:
+    _permission: 'access content'
+
+external_comment.node_redirect:
+  path: '/external/comment/{node}/reply'
+  defaults:
+    _controller: 'Drupal\external_comment\Controller\CommentController::redirectNode'
+  requirements:
+    _entity_access: 'node.view'
+    _module_dependencies: 'node'
+    node: \d+
+
+entity.external_comment_type.collection:
+  path: '/admin/structure/external/comment'
+  defaults:
+    _entity_list: 'external_comment_type'
+    _title: 'External comment types'
+  requirements:
+    _permission: 'administer external comment types'
+  options:
+    _admin_route: TRUE
+
+entity.external_comment_type.delete_form:
+  path: '/admin/structure/external/comment/manage/{external_comment_type}/delete'
+  defaults:
+    _entity_form: 'external_comment_type.delete'
+    _title: 'Delete'
+  requirements:
+    _entity_access: 'external_comment_type.delete'
+  options:
+    _admin_route: TRUE
+
+entity.external_comment_type.add_form:
+  path: '/admin/structure/external/comment/types/add'
+  defaults:
+    _entity_form: 'external_comment_type.add'
+    _title: 'Add external comment type'
+  requirements:
+    _permission: 'administer external comment types'
+  options:
+    _admin_route: TRUE
+
+entity.external_comment_type.edit_form:
+  path: '/admin/structure/external/comment/manage/{external_comment_type}'
+  defaults:
+    _entity_form: 'external_comment_type.edit'
+    _title: 'Edit'
+  requirements:
+    _entity_access: 'external_comment_type.update'
+  options:
+    _admin_route: TRUE

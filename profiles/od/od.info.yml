@@ -1,0 +1,22 @@
+name: 'Open Data'
+description: 'A Drupal distribution created to leverage the Web Experience Toolkit.'
+type: profile
+core: 8.x
+distribution:
+  name: 'Open Data'
+
+# Base profile
+base profile: wxt
+
+# Language
+keep_english: true
+
+# Required modules
+dependencies:
+  # custom (od)
+  - drupal:od_core
+
+themes:
+  - bartik
+  - seven
+  - od_bootstrap

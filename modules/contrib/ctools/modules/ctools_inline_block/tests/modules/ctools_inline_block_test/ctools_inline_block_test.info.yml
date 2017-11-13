@@ -1,0 +1,8 @@
+type: module
+name: CTools Inline Block Test
+description: 'Required for CTools Inline Block simpletests only.'
+core: 8.x
+dependencies:
+  - ctools_inline_block
+  - image
+  - text

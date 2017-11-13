@@ -1,0 +1,39 @@
+entity.external_comment.canonical_tab:
+  route_name: entity.external_comment.canonical
+  title: 'View comment'
+  base_route: entity.external_comment.canonical
+entity.external_comment.edit_form_tab:
+  route_name: entity.external_comment.edit_form
+  title: 'Edit'
+  base_route: entity.external_comment.canonical
+  weight: 0
+entity.external_comment.delete_form_tab:
+  route_name: entity.external_comment.delete_form
+  title: 'Delete'
+  base_route: entity.external_comment.canonical
+  weight: 10
+
+external_comment.admin:
+  title: Comments
+  route_name: external_comment.admin
+  base_route: system.admin_content
+
+external_comment.admin_new:
+  title: 'Published comments'
+  route_name: external_comment.admin
+  parent_id: external_comment.admin
+
+external_comment.admin_approval:
+  title: 'Unapproved comments'
+  route_name: external_comment.admin_approval
+  class: Drupal\external_comment\Plugin\Menu\LocalTask\UnapprovedComments
+  parent_id: external_comment.admin
+  weight: 1
+  cache_tags:
+    - external_comment_list
+
+# Default tab for comment type editing.
+entity.external_comment_type.edit_form:
+  title: 'Edit'
+  route_name: entity.external_comment_type.edit_form
+  base_route: entity.external_comment_type.edit_form

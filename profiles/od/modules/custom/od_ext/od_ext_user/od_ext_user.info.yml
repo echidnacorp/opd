@@ -1,0 +1,9 @@
+name: 'Open Data Extend User'
+description: 'Provides default user roles, users, and permissions.'
+type: module
+core: 8.x
+package: 'Open Data'
+dependencies:
+  - drupal:address
+  - drupal:od_ext_taxonomy
+  - drupal:wxt_ext_user

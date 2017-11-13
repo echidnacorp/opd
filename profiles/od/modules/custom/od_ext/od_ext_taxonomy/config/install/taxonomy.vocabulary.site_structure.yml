@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Site Structure'
+vid: site_structure
+description: 'Hierarchical structure of Open Government.'
+hierarchy: 0
+weight: 0

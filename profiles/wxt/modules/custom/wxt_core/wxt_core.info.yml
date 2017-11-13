@@ -1,0 +1,13 @@
+name: 'WxT Core'
+description: 'Provides core configuration.'
+type: module
+core: 8.x
+package: WxT
+
+# Required modules
+dependencies:
+  - drupal:block_class
+  - drupal:button_link
+  - drupal:lightning_core
+  - drupal:token_filter
+  - drupal:views_bootstrap

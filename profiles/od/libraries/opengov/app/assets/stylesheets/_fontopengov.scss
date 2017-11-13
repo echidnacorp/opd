@@ -1,0 +1,109 @@
+//
+// Icon Font: fontopengov
+//
+
+@font-face {
+  font-family: "fontopengov";
+  src: url("fontopengov.eot");
+  src: url("fontopengov.eot?#iefix") format("embedded-opentype"),
+       url("fontopengov.woff") format("woff"),
+       url("fontopengov.ttf") format("truetype"),
+       url("fontopengov.svg#fontopengov") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "fontopengov";
+    src: url("fontopengov.svg#fontopengov") format("svg");
+  }
+}
+
+.opengov-agriculture:before,
+.opengov-arts:before,
+.opengov-blog:before,
+.opengov-citizen:before,
+.opengov-economics:before,
+.opengov-education:before,
+.opengov-government:before,
+.opengov-health:before,
+.opengov-history:before,
+.opengov-info:before,
+.opengov-labour:before,
+.opengov-law:before,
+.opengov-maps:before,
+.opengov-military:before,
+.opengov-nature:before,
+.opengov-open-data:before,
+.opengov-open-dialog:before,
+.opengov-open-gov:before,
+.opengov-open-govt:before,
+.opengov-open-info:before,
+.opengov-projects:before,
+.opengov-science:before,
+.opengov-society:before,
+.opengov-transport:before {
+  display: inline-block;
+  font-family: "fontopengov";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+}
+
+.opengov-agriculture:before { content: "\f100"; }
+.opengov-arts:before { content: "\f101"; }
+.opengov-blog:before { content: "\f11b"; }
+.opengov-citizen:before { content: "\f102"; }
+.opengov-economics:before { content: "\f103"; }
+.opengov-education:before { content: "\f104"; }
+.opengov-government:before { content: "\f105"; }
+.opengov-health:before { content: "\f106"; }
+.opengov-history:before { content: "\f107"; }
+.opengov-info:before { content: "\f108"; }
+.opengov-labour:before { content: "\f109"; }
+.opengov-law:before { content: "\f10a"; }
+.opengov-maps:before { content: "\f10b"; }
+.opengov-military:before { content: "\f10c"; }
+.opengov-nature:before { content: "\f10d"; }
+.opengov-open-data:before { content: "\f116"; }
+.opengov-open-dialog:before { content: "\f117"; }
+.opengov-open-gov:before { content: "\f11a"; }
+.opengov-open-govt:before { content: "\f118"; }
+.opengov-open-info:before { content: "\f119"; }
+.opengov-projects:before { content: "\f10e"; }
+.opengov-science:before { content: "\f10f"; }
+.opengov-society:before { content: "\f110"; }
+.opengov-transport:before { content: "\f111"; }
+
+$font-fontopengov-agriculture: "\f100";
+$font-fontopengov-arts: "\f101";
+$font-fontopengov-blog: "\f11b";
+$font-fontopengov-citizen: "\f102";
+$font-fontopengov-economics: "\f103";
+$font-fontopengov-education: "\f104";
+$font-fontopengov-government: "\f105";
+$font-fontopengov-health: "\f106";
+$font-fontopengov-history: "\f107";
+$font-fontopengov-info: "\f108";
+$font-fontopengov-labour: "\f109";
+$font-fontopengov-law: "\f10a";
+$font-fontopengov-maps: "\f10b";
+$font-fontopengov-military: "\f10c";
+$font-fontopengov-nature: "\f10d";
+$font-fontopengov-open-data: "\f116";
+$font-fontopengov-open-dialog: "\f117";
+$font-fontopengov-open-gov: "\f11a";
+$font-fontopengov-open-govt: "\f118";
+$font-fontopengov-open-info: "\f119";
+$font-fontopengov-projects: "\f10e";
+$font-fontopengov-science: "\f10f";
+$font-fontopengov-society: "\f110";
+$font-fontopengov-transport: "\f111";

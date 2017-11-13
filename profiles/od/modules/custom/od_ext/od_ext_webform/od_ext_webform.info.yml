@@ -1,0 +1,9 @@
+name: 'Open Data Extend Webform'
+description: 'Provides functionality for storing, retrieving, and tabulating webforms.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:wxt_ext_webform

@@ -1,0 +1,10 @@
+external_comment.admin:
+  title: External comments
+  route_name: external_comment.admin
+  parent: system.admin_content
+  description: 'List and edit site comments and the comment approval queue.'
+entity.external_comment_type.collection:
+  title: 'External comment types'
+  route_name: entity.external_comment_type.collection
+  parent: system.admin_structure
+  description: 'Manage form and displays settings of comments.'

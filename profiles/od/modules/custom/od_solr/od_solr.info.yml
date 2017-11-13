@@ -1,0 +1,20 @@
+name: 'Open Data Solr'
+description: 'Search related configuration for Drupal.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:block
+  - drupal:facets
+  - drupal:facets_summary
+  - drupal:node
+  - drupal:search
+  - drupal:search_api
+  - drupal:search_api_solr
+  - drupal:system
+  - drupal:text
+  - drupal:user
+  - drupal:views
+  - drupal:wxt_ext_page

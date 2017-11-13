@@ -1,0 +1,5 @@
+name: OBD Search
+description: Search customization functionality
+package: DE Custom
+type: module
+core: 8.x

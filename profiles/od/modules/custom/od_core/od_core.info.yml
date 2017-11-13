@@ -1,0 +1,11 @@
+name: 'Open Data Core'
+description: 'Provides core configuration.'
+type: module
+core: 8.x
+package: 'Open Data'
+
+# Required modules
+dependencies:
+  - drupal:datetime_range
+  - drupal:paragraphs
+  - drupal:reference_table_formatter

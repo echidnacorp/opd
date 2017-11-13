@@ -1,0 +1,54 @@
+From 689d4a6db28baf00ea1dd51d6dbb064d7615c1c0 Mon Sep 17 00:00:00 2001
+From: William Hearn <sylus1984@gmail.com>
+Date: Mon, 10 Jul 2017 18:22:54 -0400
+Subject: [PATCH] feat(external_entity): Load external entity comment
+ information from db
+
+---
+ external_comment.module | 22 ++++++++++++++++++++++
+ src/CommentForm.php     |  2 +-
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/external_comment.module b/external_comment.module
+index a203670..624ad08 100644
+--- a/external_comment.module
++++ b/external_comment.module
+@@ -762,3 +762,25 @@ function external_comment_entity_view_display_presave(EntityViewDisplayInterface
+     }
+   }
+ }
++
++/**
++ * Implements hook_entity_type_load().
++ */
++function external_comment_external_entity_load($entities) {
++  // Load external comment information from the database and update the external
++  // entity's comment statistics properties, which are defined on each
++  // CommentItem field.
++  $result = \Drupal::service('external_comment.statistics')->read($entities, 'external_entity');
++  foreach ($result as $record) {
++    // Skip fields that entity does not have.
++    if (!$entities[$record->entity_id]->hasField($record->field_name)) {
++      continue;
++    }
++    $external_comment_statistics = $entities[$record->entity_id]->get($record->field_name);
++    $external_comment_statistics->cid = $record->cid;
++    $external_comment_statistics->last_external_comment_timestamp = $record->last_external_comment_timestamp;
++    $external_comment_statistics->last_external_comment_name = $record->last_external_comment_name;
++    $external_comment_statistics->last_external_comment_uid = $record->last_external_comment_uid;
++    $external_comment_statistics->external_comment_count = $record->external_comment_count;
++  }
++}
+diff --git a/src/CommentForm.php b/src/CommentForm.php
+index 1666125..596fd3b 100644
+--- a/src/CommentForm.php
++++ b/src/CommentForm.php
+@@ -387,7 +387,7 @@ public function save(array $form, FormStateInterface $form_state) {
+     $uri = $entity->urlInfo();
+     $logger = $this->logger('external_comment');
+ 
+-    if ($this->currentUser->hasPermission('post comments') && ($this->currentUser->hasPermission('administer external comments') || $entity->{$field_name}->status == CommentItemInterface::OPEN)) {
++    if ($this->currentUser->hasPermission('post external comments') && ($this->currentUser->hasPermission('administer external comments') || $entity->{$field_name}->status == CommentItemInterface::OPEN)) {
+       $comment->save();
+       $form_state->setValue('cid', $comment->id());
+ 

@@ -1,0 +1,181 @@
+From d9e20678b425a37913458dc404a0b59cc5b32bbd Mon Sep 17 00:00:00 2001
+From: William Hearn <sylus1984@gmail.com>
+Date: Mon, 26 Jun 2017 23:42:14 -0400
+Subject: [PATCH] feat(layout): Add custom 3col layout
+
+---
+ themes/custom/od_bootstrap/images/3col-banner.png  | Bin 0 -> 2654 bytes
+ .../custom/od_bootstrap/od_bootstrap.layouts.yml   |  47 ++++++++++++++++
+ .../templates/layouts/od-3col-banner.html.twig     |  60 +++++++++++++++++++++
+ 3 files changed, 107 insertions(+)
+ create mode 100644 themes/custom/od_bootstrap/images/3col-banner.png
+ create mode 100644 themes/custom/od_bootstrap/od_bootstrap.layouts.yml
+ create mode 100644 themes/custom/od_bootstrap/templates/layouts/od-3col-banner.html.twig
+
+diff --git a/themes/custom/od_bootstrap/images/3col-banner.png b/themes/custom/od_bootstrap/images/3col-banner.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..86d3ee634d4cb3abb192e3e7a5acf863cf6f1a27
+GIT binary patch
+literal 2654
+zcmeAS@N?(olHy`uVBq!ia0vp^OM&<W2OE&=d#jQGq*&4&eH|GXHuiJ>Nn{1`6_P!I
+zd>I(3)EF2VS{N990fib~Fff!FFfhDIU|_JC!N4G1FlSew4FdyXWM)W2NrbPDRdRl=
+zUSdjqQmS4>ZUImS1A|S46_A;mT9T+xk(-lOY*k^a1Xf`MWP^nDl@!2AO0sR0B76fB
+zob!uP6-@O^^bC~jxD*r=Y>HCStb$zJpxS{vTcwPWk^(Dz{qpj1y>er{{GxPyLrY6b
+zeFGzXBO_g)3f<z$ypqHU-MnIDh#@d@TvCgZi!uvJGV}8kK;|YU<(HP&Dk*_1f&+*<
+zOES|CHsuvVy#@53K1fF2P|rXgZZ=S>4M^0=zbG>mXfw!sJ3||=N)$1uJvRCv%aI%d
+z@hMmo=v6x|8+~}N*>U+CQjcU{;Aru5aSW+od^^`MU)o&2O*z_6YQg>`Z}&Fv@BA75
+zds=hjo!j?*X-h3wp?f-3D@{RaTf@&I{*Mg&8#X0vF_zg^c_Y^P;Ja7vK0mj=w>E75
+zzQ?SM#ex-8zdrxEy!`&FFRzuJyuW_E^o$sjy84Hw@77sr#Ld~mq}FoaHA`2wwfyz<
+z_2=(9J$S;hPhMevy+tLb4@cv)1HV&uSVt8t$vJ3XCEuu&TA4fHlQhRa8~aB7tt@``
+zr?T8G7S?b-RWxCb!>Qu!O+U38m7YBP<aWxd<?T(*H+_>lD!<tU9FS`a{d?x+?nw#O
+zJd8_ZmWhf4aVn&$9xRh!^04&L)>tCsaLTLctpUq~q8VWU9;yvffaWH0ocRCk@4wo=
+z-#;f_E4t)lHv4SezPDw&Z~uE?^X~oo-5;kf)e*gO?_Qa<O7NoDvuB5&Zauy_;!yp`
+zm)1Q!4CahWN`%$wXD|e{O%!~f)-WaS&=Y=Phf@YdOm|o&T=JdqCy~iR(#@@5Hbc-Z
+z&dK&Z44Q{ea1;nTc$p`DY6rSbLXt6$$>XJ(&p!jkB|OT?2YeYc@3x$j2O5=_!m@)?
+zVd-pxpNCl{7}3$PzFnEGqRshv!wo$dY<`&pP22SRZOd<+r&}Ul<t}}_#@?#`)WYM_
+zE|>FnJ$d29pt<{zN+ds%$IWIX%Uwbf)@vHuEK+`*?E32K%cGwk-?*N=(>FHNa>|+w
+zb(M2#GyXf@m)&}6qWr~=*ZdDDUyqTRy7AriEIXBZ3*TGR$}c)xp03z1CH>&JCG8vv
+zPZh0d%Eg#GD#hM>_PzDGeU1~G=JU_Wf4e3a)p9?NW(YcW{qh%Wr&C{a=j1bbSjPKb
+zUeBR<d3(V=R)wcEw!Zt7miXL1^i!;1%IB{p1FgyZuF2N#XN~+D&6CfzdSBZ$b>69<
+zYtahYljmtYdph@k(Um>tmtC8`_T67ojro?f+E+R@3ORUb$4$~^nGm$lt!HXOjql8d
+z6IH{CRPs5#?0Gj8m?(Sy{pfF#VwP^aw_ozXm)va8&QK<gm6MduxiM(wW_Ydv8ZcF+
+z(2U6=)7d*|Dnrn!Cmovw9lWHYgjNF$Rdt`!%Mf(y!lVdbKG3p!lmkqzZPSiuF)j%?
+zDVVO@FvV<(N*FNtdG%RHGcMV(P<10PszZy8+~iPL%BxE!t7J+qU%6*~ddu2LM^<v2
+z2>P~XZh=;kNVfWcm$&<7a4rI73$LEPZ-Fic^PXg%;_279nPX-x_qDJ{GE0y3`s=UV
+z-TB9RzDDH*UtzEOe`r_Hw8=K?a-b9#`RQ6do7=jbUsRIs=3iZN>g3C4^e~ZP+PhBO
+zJ7`JH1tW<@hM>L+tXUZx3aQP_2RVRcNQ+*8vonLHv<#1%Lc<j0l13>hU@mx&V88?{
+zd=_$Fxgg+hijBQl5SWlTVi&ZvF$9@eNc1=`Xu7{(GBshDu<78z1QuY)<RrdgAu!SN
+z^06rcbqMZq;N@jpl2c$n8!H`D1M)wtI`;m!EF^62=%4v&2~3l&z%*%xlqTQ4gr>=b
+z@1kDU{e6}0cONsAD8vV+RsL!3mFbjbvRz-Ds_E^z*#6(*g~txKE%=_#W>I@P%5{h)
+zJv^x#nwN7|s}yQ6ZJJ`6uRf<s;^-~Tf?wN|)0#9Gm-GlF*INTK4UKt?U%!3)xE|Pc
+z*?%KFiHT#6<AeF@<Nx3LpS6{zuBxs+W}ChK`~L9oaQSI(pI*K^`H%hO=@oGT79I&(
+zqjIOo%E`;g{fplAU+?|;)aWI*-|ao^_jIrIT75_V)9G;n1%evyY<1qhx_j<um5NUD
+z@#p&Dg{SM@Z#ykGIs2Sb)AZH@k0L*=<A^+}!<YBHf6CL-zn{j&J^ft8skOWutULWt
+z)fAm~Q_ov#o^DAEh(CJm^wYC}n}iZyt8A#BcCYiN{h6w}fgMS!B0x<$Pgg&ebxsLQ
+E06iO2^Z)<=
+
+literal 0
+HcmV?d00001
+
+diff --git a/themes/custom/od_bootstrap/od_bootstrap.layouts.yml b/themes/custom/od_bootstrap/od_bootstrap.layouts.yml
+new file mode 100644
+index 0000000..9c6a20f
+--- /dev/null
++++ b/themes/custom/od_bootstrap/od_bootstrap.layouts.yml
+@@ -0,0 +1,47 @@
++# Three columns (bricked).
++od_3col_banner:
++  label: '3 Columns (Custom)'
++  category: 'Open Data Bootstrap'
++  icon: images/3col-banner.png
++  template: templates/layouts/od-3col-banner
++  regions:
++    banner_left:
++      label: 'Banner Left'
++      classes:
++        - col-sm-12
++    banner_right:
++      label: 'Banner Right'
++      classes:
++        - col-sm-12
++    top_left:
++      label: 'Top Left'
++      classes:
++        - col-sm-4
++    top_middle:
++      label: 'Top Middle'
++      classes:
++        - col-sm-4
++    top_right:
++      label: 'Top Right'
++      classes:
++        - col-sm-4
++    middle:
++      label: 'Middle'
++      classes:
++        - col-sm-12
++    bottom_left:
++      label: 'Bottom Left'
++      classes:
++        - col-sm-4
++    bottom_middle:
++      label: 'Bottom Middle'
++      classes:
++        - col-sm-4
++    bottom_right:
++      label: 'Bottom Right'
++      classes:
++        - col-sm-4
++    bottom:
++      label: 'Bottom'
++      classes:
++        - col-sm-12
+diff --git a/themes/custom/od_bootstrap/templates/layouts/od-3col-banner.html.twig b/themes/custom/od_bootstrap/templates/layouts/od-3col-banner.html.twig
+new file mode 100644
+index 0000000..6830844
+--- /dev/null
++++ b/themes/custom/od_bootstrap/templates/layouts/od-3col-banner.html.twig
+@@ -0,0 +1,60 @@
++<div class="row">
++  {% if content.banner_left %}
++  <div class="col-md-6">
++    {{ content.banner_left }}
++  </div>
++  {% endif %}
++  {% if content.banner_right %}
++  <div class="col-md-6">
++    {{ content.banner_right }}
++  </div>
++  {% endif %}
++</div>
++<div class="row">
++  {% if content.top_left %}
++  <div class="col-md-4">
++    {{ content.top_left }}
++  </div>
++  {% endif %}
++  {% if content.top_middle %}
++  <div class="col-md-4">
++    {{ content.top_middle }}
++  </div>
++  {% endif %}
++  {% if content.top_right %}
++  <div class="col-md-4">
++    {{ content.top_right }}
++  </div>
++  {% endif %}
++</div>
++<div class="row">
++  {% if content.middle %}
++  <div class="col-md-12">
++    {{ content.middle }}
++  </div>
++  {% endif %}
++</div>
++<div class="row">
++  {% if content.bottom_left %}
++  <div class="col-md-4">
++    {{ content.bottom_left }}
++  </div>
++  {% endif %}
++  {% if content.bottom_middle %}
++  <div class="col-md-4">
++    {{ content.bottom_middle }}
++  </div>
++  {% endif %}
++  {% if content.bottom_right %}
++  <div class="col-md-4">
++    {{ content.bottom_right }}
++  </div>
++  {% endif %}
++</div>
++<div class="row">
++  {% if content.bottom %}
++  <div class="col-md-12">
++    {{ content.bottom }}
++  </div>
++  {% endif %}
++</div>
+-- 
+2.5.4 (Apple Git-61)
+

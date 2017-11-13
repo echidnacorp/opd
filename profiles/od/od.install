@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the Open Data installation profile.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ *
+ * @see system_install()
+ */
+function od_install() {
+  _od_setup_themes();
+  _od_setup_branding();
+  _od_setup_base_configurations();
+}
+
+/**
+ * Setup base site configurations.
+ */
+function _od_setup_base_configurations() {
+  // Ensure the translation fields are created in the database.
+  \Drupal::service('entity.definition_update_manager')->applyUpdates();
+}
+
+/**
+ * Set up the default branding.
+ */
+function _od_setup_branding() {
+  // Set the path to the logo, favicon and README file based on install
+  // directory.
+  $od_path = drupal_get_path('profile', 'od');
+  \Drupal::configFactory()
+    ->getEditable('system.theme.global')
+    ->set('logo', [
+      'path' => $od_path . '/od.svg',
+      'url' => '',
+      'use_default' => FALSE,
+    ])
+    ->set('favicon', [
+      'mimetype' => 'image/vnd.microsoft.icon',
+      'path' => $od_path . '/favicon.ico',
+      'url' => '',
+      'use_default' => FALSE,
+    ])
+    ->save(TRUE);
+}
+
+/**
+ * Setup the themes.
+ */
+function _od_setup_themes() {
+  // Set the default and admin theme.
+  \Drupal::configFactory()
+    ->getEditable('system.theme')
+    ->set('default', 'od_bootstrap')
+    ->set('admin', 'seven')
+    ->save(TRUE);
+
+  // Enable the admin theme.
+  \Drupal::configFactory()
+    ->getEditable('node.settings')
+    ->set('use_admin_theme', TRUE)
+    ->save(TRUE);
+}

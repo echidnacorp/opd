@@ -1,0 +1,5 @@
+services:
+  plugin.manager.votingapi.resultfunction:
+    class: Drupal\votingapi\VoteResultFunctionManager
+    arguments: ['@uuid']
+    parent: default_plugin_manager

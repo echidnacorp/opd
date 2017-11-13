@@ -1,0 +1,24 @@
+<?php
+use \Drupal\Core\Url;
+/**
+ * Implements hook_preprocess_hook().
+ */
+function obd_search_preprocess_links__language_block(&$variables) {
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  if ($language == 'en') {
+    // we need to alter French link
+    $int_path = $variables['links']['fr']['link']['#url']->getInternalPath();
+    if (!empty($int_path) && $int_path == 'search-proto-en') {
+      $route = 'view.search_view_french.page_1';
+      $variables['links']['fr']['link']['#url']= Url::fromRoute($route);
+    }
+  }
+  else {
+    // we need to alter English link
+    $int_path = $variables['links']['en']['link']['#url']->getInternalPath();
+    if (!empty($int_path) && $int_path == 'search-proto-fr') {
+      $route = 'view.search_view_english.page_1';
+      $variables['links']['en']['link']['#url']= Url::fromRoute($route);
+    }
+  }
+}

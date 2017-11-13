@@ -1,0 +1,13 @@
+{
+  "name": "drupal/external_comment",
+  "description": "Port of comment module with storage PK as string support.",
+  "type": "drupal-module",
+  "authors": [
+    {
+      "name": "Drupal Community",
+      "homepage": "https://www.drupal.org"
+    }
+  ],
+  "license": "GPL-2.0+",
+  "require": {}
+}

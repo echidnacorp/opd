@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Consultation Status'
+vid: consultation_status
+description: 'Consultation status labelling.'
+hierarchy: 0
+weight: 0

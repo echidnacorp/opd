@@ -1,0 +1,26 @@
+name: 'WxT Admin'
+description: 'Installs default configuration for administrative tasks.'
+type: module
+core: 8.x
+package: WxT
+
+# Required modules
+dependencies:
+  - drupal:admin_toolbar
+  - drupal:admin_toolbar_tools
+  - drupal:config_rewrite
+  - drupal:config_update
+  - drupal:contact
+  - drupal:diff
+  - drupal:embed
+  - drupal:entity_embed
+  - drupal:field_group
+  - drupal:page_manager
+  - drupal:panelizer
+  - drupal:panels_ipe
+  - drupal:pathauto
+  - drupal:token
+  - drupal:url_embed
+  - drupal:workbench_moderation
+  - drupal:wxt_core
+  - drupal:wxt_ext_theme

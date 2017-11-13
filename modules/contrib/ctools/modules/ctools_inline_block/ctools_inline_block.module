@@ -1,0 +1,106 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
+use Drupal\block\BlockInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\ctools_inline_block\Plugin\Block\InlineBlock;
+
+/**
+ * Implements hook_ENTITY_TYPE_create().
+ */
+function ctools_inline_block_entity_form_display_create(EntityFormDisplayInterface $form_display) {
+  $mask = \Drupal::entityTypeManager()
+    ->getDefinition($form_display->getTargetEntityTypeId())
+    ->get('mask');
+
+  if ($mask) {
+    $components = entity_get_form_display($mask, $form_display->getTargetBundle(), $form_display->getMode())
+      ->getComponents();
+
+    foreach ($components as $id => $component) {
+      $form_display->setComponent($id, $component);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function ctools_inline_block_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle) {
+  $result = [];
+
+  $mask = $entity_type->get('mask');
+  if ($mask) {
+    $storages = ctools_inline_block_entity_field_storage_info($entity_type);
+
+    /** @var \Drupal\field\FieldConfigInterface[] $fields */
+    $fields = \Drupal::entityTypeManager()
+      ->getStorage('field_config')
+      ->loadByProperties([
+        'entity_type' => $mask,
+        'bundle' => $bundle,
+      ]);
+
+    foreach ($fields as $field) {
+      $field_name = $field->getName();
+
+      $result[$field_name] = $field->createDuplicate()
+        ->set('entity_type', $mask)
+        ->set('fieldStorage', $storages[$field_name]);
+    }
+  }
+  return $result;
+}
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function ctools_inline_block_entity_field_storage_info(EntityTypeInterface $entity_type) {
+  $result = [];
+
+  $mask = $entity_type->get('mask');
+  if ($mask) {
+    /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
+    $fields = \Drupal::entityTypeManager()
+      ->getStorage('field_storage_config')
+      ->loadByProperties([
+        'entity_type' => $mask,
+      ]);
+
+    foreach ($fields as $field) {
+      $result[$field->getName()] = $field->createDuplicate()
+        ->set('entity_type', $mask);
+    }
+  }
+  return $result;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function ctools_inline_block_block_insert(BlockInterface $block) {
+  $plugin = $block->getPlugin();
+
+  if ($plugin instanceof InlineBlock) {
+    \Drupal::database()
+      ->insert('inline_block')
+      ->fields([
+        'uuid' => $plugin->getEntity()->uuid(),
+        'loader' => 'ctools_inline_block.block_loader',
+        'data' => $block->id(),
+      ])
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function ctools_inline_block_block_delete(BlockInterface $block) {
+  $plugin = $block->getPlugin();
+
+  if ($plugin instanceof InlineBlock) {
+    $plugin->getEntity()->delete();
+  }
+}

@@ -1,0 +1,77 @@
+# Schema for the views plugins of the Comment module.
+
+views.argument.argument_external_comment_user_uid:
+  type: views_argument
+  label: 'External commented user ID'
+
+views.field.external_comment_depth:
+  type: views_field
+  label: 'External comment depth'
+
+views.field.external_comment_entity_link:
+  type: views_field
+  label: 'External comment link'
+  mapping:
+    teaser:
+      type: boolean
+      label: 'Show teaser-style link'
+
+views.field.external_comment_last_timestamp:
+  type: views.field.date
+  label: 'Last external comment date'
+
+views.field.external_comment_link_approve:
+  type: views.field.external_comment_link
+  label: 'External comment approve link'
+
+views.field.external_comment_link_reply:
+  type: views.field.external_comment_link
+  label: 'External comment reply link'
+
+views.field.node_new_comments:
+  type: views.field.numeric
+  label: 'Number of new external comments'
+  mapping:
+    link_to_comment:
+      type: boolean
+      label: 'Link this field to new external comments'
+
+views.field.external_comment_ces_last_external_comment_name:
+  type: views_field
+  label: 'Name of last external comment poster'
+
+views.field.external_comment_ces_last_updated:
+  type: views_field
+  label: 'Newer of last external comment / node updated'
+
+views.filter.node_comment:
+  type: views.filter.in_operator
+  label: 'External comment node status'
+
+views.filter.external_comment_ces_last_updated:
+  type: views.filter.date
+  label: 'Newer of last external comment / node updated'
+
+views.filter.external_comment_user_uid:
+  type: views_filter
+  label: 'Node user posted external comment'
+
+views.row.external_comment_rss:
+  type: views_row
+  label: 'External comment'
+  mapping:
+    view_mode:
+      type: string
+      label: 'Display type'
+
+views.sort.external_comment_ces_last_external_comment_name:
+  type: views_sort
+  label: 'Last external comment name'
+
+views.sort.external_comment_ces_last_updated:
+  type: views.sort.date
+  label: 'Newer of last external comment / entity updated'
+
+views.sort.external_comment_thread:
+  type: views_sort
+  label: 'Thread'

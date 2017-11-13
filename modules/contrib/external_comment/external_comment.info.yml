@@ -1,0 +1,10 @@
+name: External Comment
+type: module
+description: 'Allows users to comment on and discuss external content.'
+package: Core
+version: VERSION
+core: 8.x
+dependencies:
+  - text
+  - entity_reference
+configure: external_comment.admin

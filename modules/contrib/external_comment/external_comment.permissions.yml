@@ -1,0 +1,13 @@
+administer external comments:
+  title: 'administer external comments and comment settings'
+administer external comment types:
+  title: 'administer external comment types and settings'
+  restrict access: true
+access external comments:
+  title: 'View external comments'
+post external comments:
+  title: 'post external comments'
+skip external comment approval:
+  title: 'skip external comment approval'
+edit own external comments:
+  title: 'edit own external comments'

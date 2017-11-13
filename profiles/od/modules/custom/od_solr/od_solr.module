@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Contains od_solr.module..
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function od_solr_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the od_solr module.
+    case 'help.page.od_solr':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Search related configuration for Drupal.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function od_solr_form_wxt_search_block_form_alter(&$form, FormStateInterface $form_state) {
+  $form['#action'] = '/search/site';
+}
+
+/**
+ * Implements hook_search_api_field_type_mapping_alter().
+ *
+ * Add mappings for Solr data types to Search API data types.
+ */
+function od_solr_search_api_field_type_mapping_alter(array &$mapping) {
+  $mapping['text_en'] = 'string';
+  $mapping['text_fr'] = 'string';
+}

@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function ctools_inline_block_schema() {
+  return [
+    'inline_block' => [
+      'fields' => [
+        'uuid' => [
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+          'description' => 'UUID of the inline block.',
+        ],
+        'loader' => [
+          'type' => 'varchar',
+          'length' => 128,
+          'not null' => TRUE,
+          'description' => 'ID of the service which can load the block.',
+        ],
+        'data' => [
+          'type' => 'text',
+          'description' => 'Additional data needed to load the block.',
+        ],
+      ],
+      'primary key' => ['uuid'],
+    ],
+  ];
+}

@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implements template_preprocess_block().
+ */
+function ctools_inline_block_test_preprocess_block(array &$variables) {
+  // Disguise inline_content plugin instances as block_content instances.
+  if ($variables['base_plugin_id'] == 'inline_content') {
+    $variables['plugin_id'] = 'block_content:' . unserialize($variables['configuration']['entity'])->uuid();
+  }
+}

@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.communities.field_taxonomy_comments
+    - taxonomy.vocabulary.communities
+  module:
+    - comment
+    - text
+id: taxonomy_term.communities.default
+targetEntityType: taxonomy_term
+bundle: communities
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_taxonomy_comments:
+    weight: 1
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    type: comment_default
+    region: content
+hidden:
+  langcode: true
